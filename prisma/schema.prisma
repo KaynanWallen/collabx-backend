@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  twoFactor     Boolean
+  createdAt     DateTime @default(now())
+  lastModified  DateTime @updatedAt
+  profiles      Profile[]
+}
+
+model Profile {
+  id              Int      @id @default(autoincrement())
+  accountId       Int
+  name            String
+  title           String
+  githubLink      String?
+  linkedinLink    String?
+  twitterLink     String?
+  about           String?
+  techs           String?
+  followersCount  Int      @default(0)
+  followingCount  Int      @default(0)
+  createdAt       DateTime @default(now())
+  lastModified    DateTime @updatedAt
+  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  projects        Project[]
+  comments        Comment[]
+  reactions       ProjectReaction[]
+  followers       Follower[] @relation("ProfileFollowers")
+  following       Follower[] @relation("ProfileFollowing")
+  favorites       Favorite[]
+  commentReaction CommentReaction[]
+}
+
+model Image {
+  id            Int      @id @default(autoincrement())
+  cloudflareId  String
+  name          String
+  type          String
+  createdAt     DateTime @default(now())
+  lastModified  DateTime @updatedAt
+  projects      ImageToProject[]
+}
+
+model Project {
+  id             Int      @id @default(autoincrement())
+  authorId       Int
+  content        String
+  techs          String?
+  figmaLink      String?
+  githubLink     String?
+  linkedinLink   String?
+  likeCount      Int      @default(0)
+  dislikeCount   Int      @default(0)
+  commentCount   Int      @default(0)
+  createdAt      DateTime @default(now())
+  lastModified   DateTime @updatedAt
+  author         Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments       Comment[]
+  reactions      ProjectReaction[]
+  images         ImageToProject[]
+  favorites      Favorite[]
+}
+
+model Comment {
+  id             Int      @id @default(autoincrement())
+  projectId      Int
+  authorId       Int
+  parentId       Int?  // Adicione este campo para armazenar a referência ao comentário pai
+  content        String
+  likeCount      Int      @default(0)
+  dislikeCount   Int      @default(0)
+  commentCount   Int      @default(0)
+  createdAt      DateTime @default(now())
+  lastModified   DateTime @updatedAt
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author         Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent         Comment? @relation("ParentComment", fields: [parentId], references: [id])
+  children       Comment[] @relation("ParentComment")  // Mantém a relação inversa
+  commentReaction CommentReaction[]
+}
+
+model Follower {
+  id          Int     @id @default(autoincrement())
+  followerId  Int
+  followingId Int
+  createdAt   DateTime @default(now())
+  follower    Profile  @relation("ProfileFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   Profile  @relation("ProfileFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id         Int     @id @default(autoincrement())
+  userId     Int
+  projectId  Int
+  createdAt  DateTime @default(now())
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProjectReaction {
+  id            Int      @id @default(autoincrement())
+  projectId     Int
+  authorId      Int
+  reactionType  String
+  createdAt     DateTime @default(now())
+  lastModified  DateTime @updatedAt
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author        Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model CommentReaction {
+  id            Int      @id @default(autoincrement())
+  commentId     Int
+  authorId      Int
+  reactionType  String
+  createdAt     DateTime @default(now())
+  lastModified  DateTime @updatedAt
+  comment       Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  author        Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model ImageToProject {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  imageId    Int
+  primary    Boolean @default(false)
+  createdAt  DateTime @default(now())
+  lastModified DateTime @updatedAt
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  image      Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+}
