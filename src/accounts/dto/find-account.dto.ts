@@ -1,4 +1,5 @@
-export class CreateAccountDto {
+export class FindAccountDto {
+  id: number;
   email: string;
   password: string;
   twoFactor: boolean;
