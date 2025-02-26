@@ -8,9 +8,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { ProfilesModule } from './profiles/profiles.module';
 import { ProjectsModule } from './projects/projects.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
-  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule],
+  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService,
      {
