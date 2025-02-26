@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from 'src/database/prisma.service';
 import { FindAccountDto } from 'src/accounts/dto/find-account.dto';
-import { CreateProfileDto } from 'src/profiles/dto/create-profile.dto';
+import { CreateProfileDTO } from 'src/profiles/dto/create-profile.dto';
 import { ProfileDTO } from 'src/profiles/dto/profile.dto';
 import { ProfilesRepository } from '../profile.repository';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -12,7 +12,7 @@ import { UpdateProfileDto } from 'src/profiles/dto/update-profile.dto';
 export class PrismaProfilesRepository implements ProfilesRepository {
   constructor(private prisma: PrismaService) { }
 
-  async create(create_profile: CreateProfileDto): Promise<any> {
+  async create(create_profile: CreateProfileDTO): Promise<any> {
     try {
       const existOtherProfileLinkedToAccount = await this.prisma.profile.findFirst({
         where: { accountId: create_profile.accountId },

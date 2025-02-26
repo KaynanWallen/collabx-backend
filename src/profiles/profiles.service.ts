@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProfileDto } from './dto/create-profile.dto';
+import { CreateProfileDTO } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfilesRepository } from './repositories/profile.repository';
 
@@ -7,7 +7,7 @@ import { ProfilesRepository } from './repositories/profile.repository';
 export class ProfilesService {
   constructor(private ProfilesRepository: ProfilesRepository) {}
 
-  create(createProfileDto: CreateProfileDto) {
+  create(createProfileDto: CreateProfileDTO) {
     return this.ProfilesRepository.create(createProfileDto);
   }
 

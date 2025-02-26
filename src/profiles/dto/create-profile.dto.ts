@@ -1,6 +1,6 @@
 import internal from "stream";
 
-export class CreateProfileDto {
+export class CreateProfileDTO {
   accountId: number;
   name: string;
   title: string;
