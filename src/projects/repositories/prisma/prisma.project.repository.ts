@@ -7,6 +7,7 @@ import { CreateProjectDTO } from 'src/projects/dto/create-project.dto';
 import { ProjectsRepository } from '../project.repository';
 import { UpdateProjectDTO } from 'src/projects/dto/update-project.dto';
 import { ProjectDTO } from 'src/projects/dto/project.dto';
+import { FindProjectsReactionsByProjectDTO } from 'src/projects/dto/find-project-reactions-by-project.dto';
 
 @Injectable()
 export class PrismaProjectsRepository implements ProjectsRepository {
@@ -119,11 +120,116 @@ export class PrismaProjectsRepository implements ProjectsRepository {
     }
   }
 
+  async findAllProjectsReactionsByProjectId(projectId: number): Promise<FindProjectsReactionsByProjectDTO[] | null> {
+    try {
+      return await this.prisma.projectReaction.findMany({
+        where: { projectId: projectId },
+        include: {
+          author: true,
+        },
+      })
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException('O accountId informado não existe.');
+        }
+      }
+      throw new InternalServerErrorException('Erro inesperado ao buscar o perfil.');
+    }
+  }
 
   async findAll(): Promise<ProjectDTO[] | null> {
     try {
       const projectRecord = await this.prisma.project.findMany()
       return projectRecord || []
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException('O accountId informado não existe.');
+        }
+      }
+      throw new InternalServerErrorException('Erro inesperado ao buscar o perfil.');
+    }
+  }
+
+  async addReaction(projectId: number, reactionType: string): Promise<any> {
+    try {
+      const projectRecord = await this.prisma.project.findUnique({
+        where: { id: projectId },
+      })
+      
+
+      if(!projectRecord){
+        throw new NotFoundException('O projeto informado não foi encontrado.');
+      }
+
+      if(reactionType == 'like'){
+        return await this.prisma.project.update({
+          where: { id: projectId },
+          data: {
+            likeCount: projectRecord.likeCount + 1,
+          },
+        })
+      }
+
+      if(reactionType == 'deslike'){
+        return await this.prisma.project.update({
+          where: { id: projectId },
+          data: {
+            dislikeCount: projectRecord.likeCount + 1,
+          },
+        })
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException('O accountId informado não existe.');
+        }
+      }
+      throw new InternalServerErrorException('Erro inesperado ao buscar o perfil.');
+    }
+  }
+
+  async removeReaction(projectId: number, reactionType: string): Promise<any> {
+    try {
+      const projectRecord = await this.prisma.project.findUnique({
+        where: { id: projectId },
+      })
+      
+
+      if(!projectRecord){
+        throw new NotFoundException('O comentário informado não foi encontrado.');
+      }
+
+      if(reactionType == 'like'){
+        return await this.prisma.project.update({
+          where: { id: projectId },
+          data: {
+            likeCount: projectRecord.likeCount - 1,
+          },
+        })
+      }
+
+      if(reactionType == 'deslike'){
+        return await this.prisma.comment.update({
+          where: { id: projectId },
+          data: {
+            dislikeCount: projectRecord.likeCount - 1,
+          },
+        })
+      }
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;

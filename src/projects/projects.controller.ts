@@ -27,6 +27,11 @@ export class ProjectsController {
   findCommentsByProjectId(@Param('id') id: string) {
     return this.projectsService.findCommentsByProjectId(+id);
   }
+  
+  @Get('/:id/reactions')
+  findAllProjectsReactionsByCommentId(@Param('id') id: string) {
+    return this.projectsService.findAllProjectsReactionsByProjectId(+id);
+  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProjectDTO: UpdateProjectDTO, @Req() request: Request) {

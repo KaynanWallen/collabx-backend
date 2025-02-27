@@ -8,13 +8,14 @@ import { CommentsModule } from 'src/comments/comments.module';
 import { CommentsService } from 'src/comments/comments.service';
 
 @Module({
-  imports: [CommentsModule],
+  imports: [ProjectsModule, CommentsModule],
   controllers: [ProjectsController],
-  providers: [ProjectsService, PrismaService,CommentsService,
+  providers: [ProjectsService, PrismaService,CommentsService, ProjectsService,
     {
      provide: ProjectsRepository,
      useClass: PrismaProjectsRepository,
    },
  ],
+ exports: [ProjectsRepository]
 })
 export class ProjectsModule {}

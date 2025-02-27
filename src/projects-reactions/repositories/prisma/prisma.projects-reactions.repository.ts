@@ -1,43 +1,43 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { CommentsReactionsRepository } from '../comments-reactions.repository';
-import { CreateCommentsReactionDTO } from 'src/comments-reactions/dto/create-comments-reaction.dto';
-import { UpdateCommentsReactionDTO } from 'src/comments-reactions/dto/update-comments-reaction.dto';
-import { CommentsReactionDTO } from 'src/comments-reactions/dto/comments-reaction.dto';
-import { CommentsService } from 'src/comments/comments.service';
+import { ProjectsReactionsRepository } from '../projects-reactions.repository';
+import { CreateProjectsReactionDTO } from 'src/projects-reactions/dto/create-comments-reaction.dto';
+import { UpdateProjectsReactionDTO } from 'src/projects-reactions/dto/update-comments-reaction.dto';
+import { ProjectsReactionDTO } from 'src/projects-reactions/dto/comments-reaction.dto';
+import { ProjectsService } from 'src/projects/projects.service';
 
 @Injectable()
-export class PrismaCommentsReactionsRepository implements CommentsReactionsRepository {
+export class PrismaProjectsReactionsRepository implements ProjectsReactionsRepository {
   constructor(
     private prisma: PrismaService,
-    private commentsService: CommentsService,
+    private projectsService: ProjectsService,
     // private comment
   ) { }
   
-  async create(create_commentsReaction: CreateCommentsReactionDTO, userTokenId: number | null): Promise<any> {
+  async create(create_projectsReaction: CreateProjectsReactionDTO, userTokenId: number | null): Promise<any> {
     try {
-      if(!userTokenId || userTokenId !== create_commentsReaction.authorId){
+      if(!userTokenId || userTokenId !== create_projectsReaction.authorId){
         throw new BadRequestException('Você não tem permissão para criar este projeto.');
       }
       
-      const commentReactionRecord = await this.prisma.commentReaction.findFirst({
-        where: { commentId: create_commentsReaction.commentId, authorId: create_commentsReaction.authorId },
+      const commentReactionRecord = await this.prisma.projectReaction.findFirst({
+        where: { projectId: create_projectsReaction.projectId, authorId: create_projectsReaction.authorId },
       })
 
       if(commentReactionRecord){
         throw new BadRequestException('Já existe uma reação de comentário para este comentário e autor.');
       }
 
-      const createCommentReactionRecord = await this.prisma.commentReaction.create({
+      const createCommentReactionRecord = await this.prisma.projectReaction.create({
         data: {
-          commentId: create_commentsReaction.commentId,
-          authorId: create_commentsReaction.authorId,
-          reactionType: create_commentsReaction.reactionType,
+          projectId: create_projectsReaction.projectId,
+          authorId: create_projectsReaction.authorId,
+          reactionType: create_projectsReaction.reactionType,
         }
       })
 
-      await this.commentsService.addReaction(create_commentsReaction.commentId, createCommentReactionRecord.reactionType);
+      await this.projectsService.addReaction(create_projectsReaction.projectId, createCommentReactionRecord.reactionType);
       
       return createCommentReactionRecord
       
@@ -50,26 +50,26 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     }
   }
 
-  async update(commentsReactionId: number, update_commentsReaction: UpdateCommentsReactionDTO, userTokenId: number | null): Promise<any> {
+  async update(projectsReactionId: number, update_projectsReaction: UpdateProjectsReactionDTO, userTokenId: number | null): Promise<any> {
     try {
-      const commentsReactionExists = await this.prisma.commentReaction.findUnique({
-        where: { id: commentsReactionId },
+      const projectsReactionExists = await this.prisma.projectReaction.findUnique({
+        where: { id: projectsReactionId },
       });
   
-      if (!commentsReactionExists) {
+      if (!projectsReactionExists) {
         throw new NotFoundException('A reação de comentário informada não foi encontrado.');
       }
     
-      if(!userTokenId || userTokenId !== commentsReactionExists.authorId){
+      if(!userTokenId || userTokenId !== projectsReactionExists.authorId){
         throw new BadRequestException('Você não tem permissão para editar esta reação de comentário.');
       }
 
-      return await this.prisma.commentReaction.update({
-        where: { id: commentsReactionId },
+      return await this.prisma.projectReaction.update({
+        where: { id: projectsReactionId },
         data: {
-          commentId: update_commentsReaction.commentId ?? commentsReactionExists.commentId,
-          authorId: update_commentsReaction.authorId ?? commentsReactionExists.authorId,
-          reactionType: update_commentsReaction.reactionType ?? commentsReactionExists.reactionType,
+          projectId: update_projectsReaction.projectId ?? projectsReactionExists.projectId,
+          authorId: update_projectsReaction.authorId ?? projectsReactionExists.authorId,
+          reactionType: update_projectsReaction.reactionType ?? projectsReactionExists.reactionType,
         },
       });
     } catch (error) {
@@ -81,18 +81,18 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     }
   }
 
-  async findOne(id: number): Promise<CommentsReactionDTO | null> {
+  async findOne(id: number): Promise<ProjectsReactionDTO | null> {
     try {
-      const commentsReactionRecord = await this.prisma.commentReaction.findUnique({
+      const projectsReactionRecord = await this.prisma.projectReaction.findUnique({
         where: { id: id },
       })
       
 
-      if(!commentsReactionRecord){
+      if(!projectsReactionRecord){
         throw new NotFoundException('A reação de comentário informada não foi encontrada.');
       }
 
-      return commentsReactionRecord
+      return projectsReactionRecord
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
@@ -107,13 +107,13 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     }
   }
 
-  async findAllByProfileId(profileId: number): Promise<CommentsReactionDTO[] | null> {
+  async findAllByProfileId(profileId: number): Promise<ProjectsReactionDTO[] | null> {
     try {
-      const commentsReactionRecord = await this.prisma.commentReaction.findMany({
+      const projectsReactionRecord = await this.prisma.projectReaction.findMany({
         where: { authorId: profileId },
       })
 
-      return commentsReactionRecord || []
+      return projectsReactionRecord || []
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
@@ -128,10 +128,10 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     }
   }
 
-  async findAll(): Promise<CommentsReactionDTO[] | null> {
+  async findAll(): Promise<ProjectsReactionDTO[] | null> {
     try {
-      const commentsReactionRecord = await this.prisma.commentReaction.findMany()
-      return commentsReactionRecord || []
+      const projectsReactionRecord = await this.prisma.projectReaction.findMany()
+      return projectsReactionRecord || []
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
@@ -146,26 +146,26 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     }
   }
 
-  async remove(id: number, userTokenId: number | null): Promise<CommentsReactionDTO | null> {
+  async remove(id: number, userTokenId: number | null): Promise<ProjectsReactionDTO | null> {
     try {
-      const commentsReactionRecord = await this.prisma.commentReaction.findUnique({
+      const projectsReactionRecord = await this.prisma.commentReaction.findUnique({
         where: { id: id },
       })
       
 
-      if(!commentsReactionRecord){
+      if(!projectsReactionRecord){
         throw new NotFoundException('O perfil informado não foi encontrado.');
       }
 
-      if(!userTokenId || userTokenId !== commentsReactionRecord.authorId){
+      if(!userTokenId || userTokenId !== projectsReactionRecord.authorId){
         throw new BadRequestException('Você não tem permissão para remover este projeto.');
       }
 
-      const removeCommentReactionRecord = await this.prisma.commentReaction.delete({
+      const removeCommentReactionRecord = await this.prisma.projectReaction.delete({
         where: { id: id },
       });
 
-      await this.commentsService.removeReaction(removeCommentReactionRecord.commentId, removeCommentReactionRecord.reactionType);
+      await this.projectsService.removeReaction(removeCommentReactionRecord.projectId, removeCommentReactionRecord.reactionType);
 
       return removeCommentReactionRecord
     } catch (error) {

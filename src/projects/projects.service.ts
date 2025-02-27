@@ -27,8 +27,20 @@ export class ProjectsService {
     return this.CommentsRepository.findAllByProjectId(id);
   }
 
+  findAllProjectsReactionsByProjectId(projectId: number){
+    return this.ProjectsRepository.findAllProjectsReactionsByProjectId(projectId);
+  }
+
   update(id: number, updateProfileDto: UpdateProjectDTO, userTokenId: number | null) {
     return this.ProjectsRepository.update(id, updateProfileDto, userTokenId);
+  }
+
+  addReaction(id: number, reactionType: string) {
+    return this.ProjectsRepository.addReaction(id, reactionType);
+  }
+
+  removeReaction(id: number, reactionType: string) {
+    return this.ProjectsRepository.removeReaction(id, reactionType);
   }
 
   remove(id: number, userTokenId: number | null) {

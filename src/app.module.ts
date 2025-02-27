@@ -10,9 +10,10 @@ import { ProfilesModule } from './profiles/profiles.module';
 import { ProjectsModule } from './projects/projects.module';
 import { CommentsModule } from './comments/comments.module';
 import { CommentsReactionsModule } from './comments-reactions/comments-reactions.module';
+import { ProjectsReactionsModule } from './projects-reactions/projects-reactions.module';
 
 @Module({
-  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, CommentsReactionsModule],
+  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, CommentsReactionsModule, ProjectsReactionsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService,
      {
