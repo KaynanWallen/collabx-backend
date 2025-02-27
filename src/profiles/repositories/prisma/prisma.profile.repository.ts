@@ -12,8 +12,12 @@ import { UpdateProfileDto } from 'src/profiles/dto/update-profile.dto';
 export class PrismaProfilesRepository implements ProfilesRepository {
   constructor(private prisma: PrismaService) { }
 
-  async create(create_profile: CreateProfileDTO): Promise<any> {
+  async create(create_profile: CreateProfileDTO, userTokenId: number | null): Promise<any> {
     try {
+      if(!userTokenId || userTokenId !== create_profile.accountId){
+        throw new BadRequestException('Você não tem permissão para criar este perfil.');
+      }
+
       const existOtherProfileLinkedToAccount = await this.prisma.profile.findFirst({
         where: { accountId: create_profile.accountId },
       });
@@ -22,7 +26,6 @@ export class PrismaProfilesRepository implements ProfilesRepository {
       if (existOtherProfileLinkedToAccount) {
         throw new BadRequestException('Já existe um perfil vinculado a este accountId.');
       }
-  
   
       return this.prisma.profile.create({
         data: {
@@ -53,16 +56,21 @@ export class PrismaProfilesRepository implements ProfilesRepository {
     }
   }
 
-  async update(profileId: number, update_profile: UpdateProfileDto): Promise<any> {
+  async update(profileId: number, update_profile: UpdateProfileDto, userTokenId: number | null): Promise<any> {
     try {
       const profileExists = await this.prisma.profile.findUnique({
         where: { id: profileId },
       });
-  
+
+
       if (!profileExists) {
         throw new NotFoundException('O perfil informado não foi encontrado.');
       }
-  
+
+      if(!userTokenId || userTokenId !== profileExists.id){
+        throw new BadRequestException('Você não tem permissão para atualizar este perfil.');
+      }
+      
       return await this.prisma.profile.update({
         where: { id: profileId },
         data: {
@@ -76,7 +84,7 @@ export class PrismaProfilesRepository implements ProfilesRepository {
         },
       });
     } catch (error) {
-      if (error instanceof BadRequestException) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
       }
       
@@ -133,7 +141,7 @@ export class PrismaProfilesRepository implements ProfilesRepository {
     }
   }
 
-  async remove(id: number): Promise<ProfileDTO | null> {
+  async remove(id: number, userTokenId: number | null): Promise<ProfileDTO | null> {
     try {
       const profileRecord = await this.prisma.profile.findUnique({
         where: { id: id },
@@ -144,6 +152,10 @@ export class PrismaProfilesRepository implements ProfilesRepository {
         throw new NotFoundException('O perfil informado não foi encontrado.');
       }
 
+      if(!userTokenId || userTokenId !== profileRecord.id){
+        throw new BadRequestException('Você não tem permissão para criar este perfil.');
+      }
+      
       return await this.prisma.profile.delete({
         where: { id: id },
       });

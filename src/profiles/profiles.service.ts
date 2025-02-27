@@ -7,8 +7,8 @@ import { ProfilesRepository } from './repositories/profile.repository';
 export class ProfilesService {
   constructor(private ProfilesRepository: ProfilesRepository) {}
 
-  create(createProfileDto: CreateProfileDTO) {
-    return this.ProfilesRepository.create(createProfileDto);
+  create(createProfileDto: CreateProfileDTO, userTokenId: number | null) {
+    return this.ProfilesRepository.create(createProfileDto, userTokenId);
   }
 
   findAll() {
@@ -19,11 +19,11 @@ export class ProfilesService {
     return this.ProfilesRepository.findOne(id);
   }
 
-  update(id: number, updateProfileDto: UpdateProfileDto) {
-    return this.ProfilesRepository.update(id, updateProfileDto);
+  update(id: number, updateProfileDto: UpdateProfileDto, userTokenId: number | null) {
+    return this.ProfilesRepository.update(id, updateProfileDto, userTokenId);
   }
 
-  remove(id: number) {
-    return this.ProfilesRepository.remove(id);
+  remove(id: number, userTokenId: number | null) {
+    return this.ProfilesRepository.remove(id, userTokenId);
   }
 }

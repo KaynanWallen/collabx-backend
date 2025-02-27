@@ -12,8 +12,12 @@ import { UpdateCommentDTO } from 'src/comments/dto/update-comment.dto';
 export class PrismaCommentsRepository implements CommentsRepository {
   constructor(private prisma: PrismaService) { }
 
-  async create(create_comment: CreateCommentDTO): Promise<any> {
+  async create(create_comment: CreateCommentDTO, userTokenId: number | null): Promise<any> {
     try {
+      if(!userTokenId || userTokenId !== create_comment.authorId){
+        throw new BadRequestException('Você não tem permissão para criar este comentário.');
+      }
+
       return this.prisma.comment.create({
         data: {
           projectId: create_comment.projectId,
@@ -32,7 +36,7 @@ export class PrismaCommentsRepository implements CommentsRepository {
     }
   }
 
-  async update(commentId: number, update_comment: UpdateCommentDTO): Promise<any> {
+  async update(commentId: number, update_comment: UpdateCommentDTO, userTokenId: number | null): Promise<any> {
     try {
       const commentExists = await this.prisma.comment.findUnique({
         where: { id: commentId },
@@ -40,6 +44,10 @@ export class PrismaCommentsRepository implements CommentsRepository {
   
       if (!commentExists) {
         throw new NotFoundException('O comentário informado não foi encontrado.');
+      }
+
+      if(!userTokenId || userTokenId !== commentExists.authorId){
+        throw new BadRequestException('Você não tem editar para criar este comentário.');
       }
   
       return await this.prisma.comment.update({
@@ -104,7 +112,6 @@ export class PrismaCommentsRepository implements CommentsRepository {
     }
   }
 
-
   async findAll(): Promise<CommentDTO[] | null> {
     try {
       const commentRecord = await this.prisma.comment.findMany()
@@ -123,7 +130,7 @@ export class PrismaCommentsRepository implements CommentsRepository {
     }
   }
 
-  async remove(id: number): Promise<CommentDTO | null> {
+  async remove(id: number, userTokenId: number | null): Promise<CommentDTO | null> {
     try {
       const commentRecord = await this.prisma.comment.findUnique({
         where: { id: id },
@@ -132,6 +139,10 @@ export class PrismaCommentsRepository implements CommentsRepository {
 
       if(!commentRecord){
         throw new NotFoundException('O perfil informado não foi encontrado.');
+      }
+
+      if(!userTokenId || userTokenId !== commentRecord.authorId){
+        throw new BadRequestException('Você não tem permissão para remover este comentário.');
       }
 
       return await this.prisma.comment.delete({

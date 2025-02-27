@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { UpdateCommentDTO } from './dto/update-comment.dto';
@@ -8,8 +8,9 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Post()
-  create(@Body() createCommentDTO: CreateCommentDTO) {
-    return this.commentsService.create(createCommentDTO);
+  create(@Body() createCommentDTO: CreateCommentDTO, @Req() request: Request) {
+    const userToken: {profileId: number | null} = request['user'];
+    return this.commentsService.create(createCommentDTO, userToken.profileId);
   }
 
   @Get()
@@ -23,12 +24,14 @@ export class CommentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDTO: UpdateCommentDTO) {
-    return this.commentsService.update(+id, updateCommentDTO);
+  update(@Param('id') id: string, @Body() updateCommentDTO: UpdateCommentDTO, @Req() request: Request) {
+    const userToken: {profileId: number | null} = request['user'];
+    return this.commentsService.update(+id, updateCommentDTO, userToken.profileId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentsService.remove(+id);
+  remove(@Param('id') id: string, @Req() request: Request) {
+    const userToken: {profileId: number | null} = request['user'];
+    return this.commentsService.remove(+id, userToken.profileId);
   }
 }

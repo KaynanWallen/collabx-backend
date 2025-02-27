@@ -7,8 +7,8 @@ import { UpdateCommentDTO } from './dto/update-comment.dto';
 export class CommentsService {
   constructor(private CommentsRepository: CommentsRepository) {}
 
-  create(createProfileDto: CreateCommentDTO) {
-    return this.CommentsRepository.create(createProfileDto);
+  create(createProfileDto: CreateCommentDTO, userTokenId: number | null) {
+    return this.CommentsRepository.create(createProfileDto, userTokenId);
   }
 
   findAll() {
@@ -19,11 +19,11 @@ export class CommentsService {
     return this.CommentsRepository.findOne(id);
   }
 
-  update(id: number, updateProfileDto: UpdateCommentDTO) {
-    return this.CommentsRepository.update(id, updateProfileDto);
+  update(id: number, updateProfileDto: UpdateCommentDTO, userTokenId: number | null) {
+    return this.CommentsRepository.update(id, updateProfileDto, userTokenId);
   }
 
-  remove(id: number) {
-    return this.CommentsRepository.remove(id);
+  remove(id: number, userTokenId: number | null) {
+    return this.CommentsRepository.remove(id, userTokenId);
   }
 }
