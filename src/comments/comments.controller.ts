@@ -18,6 +18,16 @@ export class CommentsController {
     return this.commentsService.findAll();
   }
 
+  @Get('/:id/replies')
+  findAllParentByCommentId(@Param('id') id: string) {
+    return this.commentsService.findAllParentByCommentId(+id);
+  }
+
+  @Get('/:id/reactions')
+  findAllCommentsReactionsByCommentId(@Param('id') id: string) {
+    return this.commentsService.findAllCommentsReactionsByCommentId(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commentsService.findOne(+id);

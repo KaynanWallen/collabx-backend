@@ -13,5 +13,6 @@ import { PrismaCommentsRepository } from './repositories/prisma/prisma.comment.r
      useClass: PrismaCommentsRepository,
    },
  ],
+ exports: [CommentsRepository]
 })
 export class CommentsModule {}

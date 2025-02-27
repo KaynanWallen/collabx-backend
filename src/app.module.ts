@@ -9,9 +9,10 @@ import { AuthGuard } from './auth/auth.guard';
 import { ProfilesModule } from './profiles/profiles.module';
 import { ProjectsModule } from './projects/projects.module';
 import { CommentsModule } from './comments/comments.module';
+import { CommentsReactionsModule } from './comments-reactions/comments-reactions.module';
 
 @Module({
-  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule],
+  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, CommentsReactionsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService,
      {

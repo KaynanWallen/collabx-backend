@@ -12,8 +12,12 @@ import { ProjectDTO } from 'src/projects/dto/project.dto';
 export class PrismaProjectsRepository implements ProjectsRepository {
   constructor(private prisma: PrismaService) { }
 
-  async create(create_project: CreateProjectDTO): Promise<any> {
+  async create(create_project: CreateProjectDTO, userTokenId: number | null): Promise<any> {
     try {
+      if(!userTokenId || userTokenId !== create_project.authorId){
+        throw new BadRequestException('Você não tem permissão para criar este projeto.');
+      }
+
       return this.prisma.project.create({
         data: {
           authorId: create_project.authorId,
@@ -34,7 +38,7 @@ export class PrismaProjectsRepository implements ProjectsRepository {
     }
   }
 
-  async update(projectId: number, update_project: UpdateProjectDTO): Promise<any> {
+  async update(projectId: number, update_project: UpdateProjectDTO, userTokenId: number | null): Promise<any> {
     try {
       const projectExists = await this.prisma.project.findUnique({
         where: { id: projectId },
@@ -43,7 +47,11 @@ export class PrismaProjectsRepository implements ProjectsRepository {
       if (!projectExists) {
         throw new NotFoundException('O projeto informado não foi encontrado.');
       }
-  
+    
+      if(!userTokenId || userTokenId !== projectExists.authorId){
+        throw new BadRequestException('Você não tem permissão para editar este projeto.');
+      }
+
       return await this.prisma.project.update({
         where: { id: projectId },
         data: {
@@ -130,7 +138,7 @@ export class PrismaProjectsRepository implements ProjectsRepository {
     }
   }
 
-  async remove(id: number): Promise<ProjectDTO | null> {
+  async remove(id: number, userTokenId: number | null): Promise<ProjectDTO | null> {
     try {
       const projectRecord = await this.prisma.project.findUnique({
         where: { id: id },
@@ -139,6 +147,10 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
       if(!projectRecord){
         throw new NotFoundException('O perfil informado não foi encontrado.');
+      }
+
+      if(!userTokenId || userTokenId !== projectRecord.authorId){
+        throw new BadRequestException('Você não tem permissão para remover este projeto.');
       }
 
       return await this.prisma.project.delete({
