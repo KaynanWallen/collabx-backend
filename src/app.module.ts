@@ -11,9 +11,11 @@ import { ProjectsModule } from './projects/projects.module';
 import { CommentsModule } from './comments/comments.module';
 import { CommentsReactionsModule } from './comments-reactions/comments-reactions.module';
 import { ProjectsReactionsModule } from './projects-reactions/projects-reactions.module';
+import { R2BucketModule } from './r2-bucket/r2-bucket.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, CommentsReactionsModule, ProjectsReactionsModule],
+    imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, CommentsReactionsModule, ProjectsReactionsModule, R2BucketModule],
   controllers: [AppController],
   providers: [AppService, PrismaService,
      {
