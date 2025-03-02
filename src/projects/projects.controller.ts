@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDTO } from './dto/create-project.dto';
 import { UpdateProjectDTO } from './dto/update-project.dto';
+import { AddImageProjectDTO } from './dto/add-image-project.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('projects')
 export class ProjectsController {
@@ -11,6 +13,13 @@ export class ProjectsController {
   create(@Body() createProjectDTO: CreateProjectDTO, @Req() request: Request) {
     const userToken: {profileId: number | null} = request['user'];
     return this.projectsService.create(createProjectDTO, userToken.profileId);
+  }
+
+  @Post(':id/add-image')
+  @UseInterceptors(FileInterceptor('file'))
+  addImageProject(@UploadedFile() file: Express.Multer.File , @Req() request: Request, @Param('id') id: string) {
+    const userToken: {profileId: number | null} = request['user'];
+    return this.projectsService.addImageProject(file, +id, userToken.profileId)
   }
 
   @Get()

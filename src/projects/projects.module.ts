@@ -6,11 +6,13 @@ import { ProjectsRepository } from './repositories/project.repository';
 import { PrismaProjectsRepository } from './repositories/prisma/prisma.project.repository';
 import { CommentsModule } from 'src/comments/comments.module';
 import { CommentsService } from 'src/comments/comments.service';
+import { ImagesModule } from 'src/images/images.module';
+import { ImagesService } from 'src/images/images.service';
 
 @Module({
-  imports: [ProjectsModule, CommentsModule],
+  imports: [ProjectsModule, CommentsModule, ImagesModule],
   controllers: [ProjectsController],
-  providers: [ProjectsService, PrismaService,CommentsService, ProjectsService,
+  providers: [ProjectsService, PrismaService,CommentsService,ImagesService,
     {
      provide: ProjectsRepository,
      useClass: PrismaProjectsRepository,

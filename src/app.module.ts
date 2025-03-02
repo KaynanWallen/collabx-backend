@@ -1,3 +1,4 @@
+import { ImagesModule } from './images/images.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,7 +16,7 @@ import { R2BucketModule } from './r2-bucket/r2-bucket.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-    imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, CommentsReactionsModule, ProjectsReactionsModule, R2BucketModule],
+  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, ImagesModule, CommentsReactionsModule, ProjectsReactionsModule, R2BucketModule],
   controllers: [AppController],
   providers: [AppService, PrismaService,
      {

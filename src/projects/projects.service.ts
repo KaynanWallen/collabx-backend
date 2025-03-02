@@ -15,6 +15,10 @@ export class ProjectsService {
     return this.ProjectsRepository.create(createProfileDto, userTokenId);
   }
 
+  addImageProject(file: Express.Multer.File, id: number, userTokenId: number | null){
+    return this.ProjectsRepository.addImageProject(file, id, userTokenId)
+  }
+
   findAll() {
     return this.ProjectsRepository.findAll();
   }

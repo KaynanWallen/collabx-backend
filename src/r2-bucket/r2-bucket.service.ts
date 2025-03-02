@@ -35,7 +35,7 @@ export class R2BucketService {
 
     await this.s3Client.send(new PutObjectCommand(uploadParams));
 
-    return { url: `${this.configService.get('R2_ENDPOINT')}/${this.bucketName}/${key}`, key };
+    return { key };
   }
 
   async listFiles() {

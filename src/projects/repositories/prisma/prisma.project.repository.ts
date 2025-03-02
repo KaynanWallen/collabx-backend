@@ -8,10 +8,14 @@ import { ProjectsRepository } from '../project.repository';
 import { UpdateProjectDTO } from 'src/projects/dto/update-project.dto';
 import { ProjectDTO } from 'src/projects/dto/project.dto';
 import { FindProjectsReactionsByProjectDTO } from 'src/projects/dto/find-project-reactions-by-project.dto';
+import { ImagesService } from 'src/images/images.service';
 
 @Injectable()
 export class PrismaProjectsRepository implements ProjectsRepository {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private imageService: ImagesService
+  ) { }
 
   async create(create_project: CreateProjectDTO, userTokenId: number | null): Promise<any> {
     try {
@@ -273,6 +277,37 @@ export class PrismaProjectsRepository implements ProjectsRepository {
         }
       }
       throw new InternalServerErrorException('Erro inesperado ao buscar o perfil.');
+    }
+  }
+
+  async addImageProject(file: Express.Multer.File, id: number, userTokenId: number | null): Promise<any> {
+    try {
+      const projectRecord =  await this.findOne(id)
+
+      if(!projectRecord){
+        throw new NotFoundException('O projeto informado não foi encontrado.');
+      }
+      
+      if(!userTokenId || userTokenId !== projectRecord.authorId){
+        throw new BadRequestException('Você não tem permissão para criar este projeto.');
+      }
+
+      const createImageRecord = await this.imageService.create({
+        projectId: projectRecord.id,
+        authorId: userTokenId,
+        name: file.originalname,
+        type_image: file.mimetype,
+        primary_image: true,
+        image_file: file
+      }, userTokenId)
+      
+      return createImageRecord
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      console.log(error)
+      throw new InternalServerErrorException('Erro inesperado ao atualizar o perfil.');
     }
   }
 }
