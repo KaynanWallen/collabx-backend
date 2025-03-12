@@ -148,7 +148,26 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
   async findAll(): Promise<ProjectDTO[] | null> {
     try {
-      const projectRecord = await this.prisma.project.findMany()
+      const projectRecord = await this.prisma.project.findMany({
+        include: {
+          comments: {
+            include: {
+              commentReaction: true,
+              subComments: {  // Inclui os comentários filhos
+                include: {
+                  commentReaction: true, // Inclui as reações dos subcomentários também
+                  subComments: { // Se precisar de mais níveis de subcomentários, pode repetir
+                    include: { commentReaction: true }
+                  }
+                }
+              }
+            },
+            where: {
+              parentId: null // Retorna apenas os comentários principais
+            }
+          }
+        }
+      });
       return projectRecord || []
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {

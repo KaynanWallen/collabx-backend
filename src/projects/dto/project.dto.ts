@@ -1,5 +1,6 @@
 export class ProjectDTO {
   id: number;
+  title: string;
   authorId: number;
   content: string;
   techs: string | null;

@@ -64,6 +64,7 @@ model ImagesProject {
 
 model Project {
   id             Int      @id @default(autoincrement())
+  title String @default("New Project")
   authorId       Int
   content        String
   techs          String?
@@ -95,8 +96,11 @@ model Comment {
   lastModified   DateTime @updatedAt
   project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   author         Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  parent         Comment? @relation("ParentComment", fields: [parentId], references: [id])
-  children       Comment[] @relation("ParentComment")  // Mantém a relação inversa
+
+  // Relacionamento entre comentários (Pai-Filho)
+  parent         Comment?  @relation("CommentParent", fields: [parentId], references: [id])
+  subComments    Comment[] @relation("CommentParent")
+
   commentReaction CommentReaction[]
 }
 
