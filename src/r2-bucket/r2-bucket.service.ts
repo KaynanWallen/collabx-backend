@@ -53,7 +53,7 @@ export class R2BucketService {
         this.s3Client,
         new GetObjectCommand({
             Bucket: 'collabx',
-            Key: `images/${key}`,
+            Key: key.startsWith('images/') ? key : `images/${key}`,
         }),
         { expiresIn: 600 },  
       )

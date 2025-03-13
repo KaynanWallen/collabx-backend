@@ -10,6 +10,7 @@ export class ProjectDTO {
   likeCount: number;
   dislikeCount: number;
   commentCount: number;
+  projectImage?: string | null;
   createdAt: Date;
   lastModified: Date;
 }

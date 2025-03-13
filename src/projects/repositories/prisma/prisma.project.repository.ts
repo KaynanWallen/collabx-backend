@@ -9,12 +9,14 @@ import { UpdateProjectDTO } from 'src/projects/dto/update-project.dto';
 import { ProjectDTO } from 'src/projects/dto/project.dto';
 import { FindProjectsReactionsByProjectDTO } from 'src/projects/dto/find-project-reactions-by-project.dto';
 import { ImagesService } from 'src/images/images.service';
+import { R2BucketService } from 'src/r2-bucket/r2-bucket.service';
 
 @Injectable()
 export class PrismaProjectsRepository implements ProjectsRepository {
   constructor(
     private prisma: PrismaService,
-    private imageService: ImagesService
+    private imageService: ImagesService,
+    private r2Bucket: R2BucketService
   ) { }
 
   async create(create_project: CreateProjectDTO, userTokenId: number | null): Promise<any> {
@@ -168,7 +170,16 @@ export class PrismaProjectsRepository implements ProjectsRepository {
           }
         }
       });
-      return projectRecord || []
+      
+      const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
+        const imageUrl = await this.findImageByProjectId(p.id)
+        return {
+          ...p,
+          projectImage: imageUrl?.url
+        } as ProjectDTO
+      }))
+
+      return projectRecordFormattedWithImage || []
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
@@ -180,6 +191,32 @@ export class PrismaProjectsRepository implements ProjectsRepository {
         }
       }
       throw new InternalServerErrorException('Erro inesperado ao buscar o perfil.');
+    }
+  }
+
+  async findImageByProjectId(projectId: number): Promise<{url: string} | null> {
+    try {
+      const imageProjectRecord = await this.prisma.imagesProject.findFirst({
+        where: { projectId: projectId, primary_image: true},
+      })
+
+      if(!imageProjectRecord){
+        return null
+      }
+
+      const cloudFlareLink = await this.r2Bucket.getFile(imageProjectRecord.cloudflareId)
+      return cloudFlareLink
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException('O accountId informado não existe.');
+        }
+      }
+      throw new InternalServerErrorException('Erro inesperado ao buscar a imagem.');
     }
   }
 

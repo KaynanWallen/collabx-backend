@@ -14,7 +14,7 @@ export class ProjectsController {
     const userToken: {profileId: number | null} = request['user'];
     return this.projectsService.create(createProjectDTO, userToken.profileId);
   }
-
+  
   @Post(':id/add-image')
   @UseInterceptors(FileInterceptor('file'))
   addImageProject(@UploadedFile() file: Express.Multer.File , @Req() request: Request, @Param('id') id: string) {
@@ -25,6 +25,11 @@ export class ProjectsController {
   @Get()
   findAll() {
     return this.projectsService.findAll();
+  }
+
+  @Get(':id/image')
+  findImageByProjectId(@Param('id') id: string) {
+    return this.projectsService.findImageByProjectId(+id);
   }
 
   @Get(':id')

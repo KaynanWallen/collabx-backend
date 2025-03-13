@@ -22,7 +22,10 @@ export class ProjectsService {
   findAll() {
     return this.ProjectsRepository.findAll();
   }
-
+  
+  findImageByProjectId(id: number){
+    return this.ProjectsRepository.findImageByProjectId(id)
+  }
   findOne(id: number) {
     return this.ProjectsRepository.findOne(id);
   }
