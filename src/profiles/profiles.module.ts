@@ -13,5 +13,6 @@ import { PrismaProfilesRepository } from './repositories/prisma/prisma.profile.r
      useClass: PrismaProfilesRepository,
    },
  ],
+  exports: [ProfilesRepository],
 })
 export class ProfilesModule {}
