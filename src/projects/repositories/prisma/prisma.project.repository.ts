@@ -28,11 +28,12 @@ export class PrismaProjectsRepository implements ProjectsRepository {
       return this.prisma.project.create({
         data: {
           authorId: create_project.authorId,
+          title: create_project.title,
           content: create_project.content,
           techs: create_project.techs,
           figmaLink: create_project.linkedinLink,
           githubLink: create_project.githubLink,
-          linkedinLink: create_project.linkedinLink
+          linkedinLink: create_project.linkedinLink,
         }
       })
       
@@ -173,7 +174,6 @@ export class PrismaProjectsRepository implements ProjectsRepository {
           }
         }
       });
-      console.log(projectRecord)
       // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
       //   const imageUrl = await this.findImageByProjectId(p.id)
       //   return {
@@ -199,7 +199,7 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
   async findImageByProjectId(projectId: number): Promise<{url: string} | null> {
     try {
-      const imageProjectRecord = await this.prisma.imagesProject.findFirst({
+      const imageProjectRecord = await this.prisma.imageProject.findFirst({
         where: { projectId: projectId, primary_image: true},
       })
 

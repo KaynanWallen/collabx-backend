@@ -22,7 +22,7 @@ export class PrismaImagesRepository implements ImagesRepository {
 
       const r2BucketToken = await this.r2Bucket.uploadFile(create_image.image_file)
 
-      return this.prisma.imagesProject.create({
+      return this.prisma.imageProject.create({
         data: {
           authorId: create_image.authorId,
           cloudflareId: r2BucketToken.key,
@@ -53,7 +53,7 @@ export class PrismaImagesRepository implements ImagesRepository {
       }
 
 
-      const imageExists = await this.prisma.imagesProject.findUnique({
+      const imageExists = await this.prisma.imageProject.findUnique({
         where: { id: imageId },
       });
 
@@ -66,7 +66,7 @@ export class PrismaImagesRepository implements ImagesRepository {
         throw new BadRequestException('Você não tem permissão para atualizar este imagem.');
       }
       
-      return await this.prisma.imagesProject.update({
+      return await this.prisma.imageProject.update({
         where: { id: imageId },
         data: {
           name: update_image.name ?? imageExists.name,
@@ -90,7 +90,7 @@ export class PrismaImagesRepository implements ImagesRepository {
 
   async findOne(id: number): Promise<ImageDTO | null> {
     try {
-      const imageRecord = await this.prisma.imagesProject.findUnique({
+      const imageRecord = await this.prisma.imageProject.findUnique({
         where: { id: id },
       })
       
@@ -116,7 +116,7 @@ export class PrismaImagesRepository implements ImagesRepository {
 
   async findAll(): Promise<ImageDTO[] | null> {
     try {
-      const imageRecord = await this.prisma.imagesProject.findMany()
+      const imageRecord = await this.prisma.imageProject.findMany()
       return imageRecord || []
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
@@ -135,7 +135,7 @@ export class PrismaImagesRepository implements ImagesRepository {
   async remove(id: number, userTokenId: number | null): Promise<ImageDTO | null> {
     try {
 
-      const imageRecord = await this.prisma.imagesProject.findUnique({
+      const imageRecord = await this.prisma.imageProject.findUnique({
         where: { id: id },
       })
       
@@ -152,7 +152,7 @@ export class PrismaImagesRepository implements ImagesRepository {
         throw new BadRequestException('Você não tem permissão para criar este imagem.');
       }
       
-      return await this.prisma.imagesProject.delete({
+      return await this.prisma.imageProject.delete({
         where: { id: id },
       });
     } catch (error) {

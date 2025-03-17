@@ -30,6 +30,7 @@ export class PrismaProfilesRepository implements ProfilesRepository {
       return this.prisma.profile.create({
         data: {
           accountId: create_profile.accountId,
+          username: create_profile.username,
           name: create_profile.name,
           title: create_profile.title,
           githubLink: create_profile.githubLink,

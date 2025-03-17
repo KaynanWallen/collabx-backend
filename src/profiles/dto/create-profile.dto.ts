@@ -2,6 +2,7 @@ import internal from "stream";
 
 export class CreateProfileDTO {
   accountId: number;
+  username: string;
   name: string;
   title: string;
   githubLink: string | null;
