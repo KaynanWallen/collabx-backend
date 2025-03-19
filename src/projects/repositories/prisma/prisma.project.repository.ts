@@ -110,7 +110,35 @@ export class PrismaProjectsRepository implements ProjectsRepository {
     try {
       const projectRecord = await this.prisma.project.findMany({
         where: { authorId: profileId },
-      })
+        include: {
+          author: true,
+          comments: {
+            include: {
+              commentReaction: true,
+              author: true,
+              subComments: {  // Inclui os comentários filhos
+                include: {
+                  author: true,
+                  commentReaction: true, // Inclui as reações dos subcomentários também
+                  // subComments: { // Se precisar de mais níveis de subcomentários, pode repetir
+                  //   include: { commentReaction: true, author: true }
+                  // }
+                }
+              }
+            },
+            where: {
+              parentId: null // Retorna apenas os comentários principais
+            }
+          }
+        }
+      });
+      // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
+      //   const imageUrl = await this.findImageByProjectId(p.id)
+      //   return {
+      //     ...p,
+      //     projectImage: imageUrl?.url
+      //   } as ProjectDTO
+      // }))
 
       return projectRecord || []
     } catch (error) {
