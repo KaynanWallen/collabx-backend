@@ -50,6 +50,50 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     }
   }
 
+  async toggle(create_commentsReaction: CreateCommentsReactionDTO, userTokenId: number | null): Promise<any> {
+    try {
+      if(!userTokenId || userTokenId !== create_commentsReaction.authorId){
+        throw new BadRequestException('Você não tem permissão para reagir a este comentário.');
+      }
+      
+      const commentReactionRecord = await this.prisma.commentReaction.findFirst({
+        where: { commentId: create_commentsReaction.commentId, authorId: create_commentsReaction.authorId, reactionType: create_commentsReaction.reactionType},
+      })
+
+      if(commentReactionRecord){
+        const updateCommentReactionRecord = await this.prisma.commentReaction.update({
+          where: { id: commentReactionRecord.id },
+          data: {
+            reactionType: commentReactionRecord.reactionType
+          },
+        })
+
+      await this.commentsService.removeReaction(create_commentsReaction.commentId, updateCommentReactionRecord.reactionType);
+
+      return updateCommentReactionRecord
+      }
+
+      const createCommentReactionRecord = await this.prisma.commentReaction.create({
+        data: {
+          commentId: create_commentsReaction.commentId,
+          authorId: create_commentsReaction.authorId,
+          reactionType: create_commentsReaction.reactionType,
+        }
+      })
+
+      await this.commentsService.addReaction(create_commentsReaction.commentId, createCommentReactionRecord.reactionType);
+      
+      return createCommentReactionRecord
+      
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Erro inesperado ao atualizar o perfil.');
+    }
+  }
+
   async update(commentsReactionId: number, update_commentsReaction: UpdateCommentsReactionDTO, userTokenId: number | null): Promise<any> {
     try {
       const commentsReactionExists = await this.prisma.commentReaction.findUnique({

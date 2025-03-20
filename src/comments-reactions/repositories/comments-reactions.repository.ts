@@ -4,6 +4,7 @@ import { UpdateCommentsReactionDTO } from "../dto/update-comments-reaction.dto";
 
 export abstract class CommentsReactionsRepository {
   abstract create(create_commentsReaction: CreateCommentsReactionDTO, userTokenId: number | null): Promise<any>;
+  abstract toggle(create_commentsReaction: CreateCommentsReactionDTO, userTokenId: number | null): Promise<any>;
   abstract update(commentsReactionId: number, update_commentsReaction: UpdateCommentsReactionDTO, userTokenId: number | null): Promise<any>;
   abstract findOne(commentsReactionId: number): Promise<CommentsReactionDTO | null>;
   abstract findAllByProfileId(profileId: number): Promise<CommentsReactionDTO[] | null>;

@@ -11,6 +11,10 @@ export class CommentsReactionsService {
     return this.CommentsReactionsRepository.create(createProfileDto, userTokenId);
   }
 
+  toggle(toggleCommentReaction: CreateCommentsReactionDTO, userTokenId: number | null){
+    return this.CommentsReactionsRepository.toggle(toggleCommentReaction, userTokenId);
+  }
+
   findAll() {
     return this.CommentsReactionsRepository.findAll();
   }

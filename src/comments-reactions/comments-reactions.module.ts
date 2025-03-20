@@ -6,9 +6,21 @@ import { CommentsReactionsRepository } from './repositories/comments-reactions.r
 import { PrismaCommentsReactionsRepository } from './repositories/prisma/prisma.comments-reactions.repository';
 import { CommentsService } from 'src/comments/comments.service';
 import { CommentsModule } from 'src/comments/comments.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
-  imports: [CommentsModule],
+  imports: [
+    CommentsModule,
+    BullModule.forRoot({
+      redis: {
+        host: '127.0.0.1',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'commentsReactionsQueue',
+    })
+  ],
   controllers: [CommentsReactionsController],
   providers: [CommentsReactionsService, PrismaService, CommentsService,
     {

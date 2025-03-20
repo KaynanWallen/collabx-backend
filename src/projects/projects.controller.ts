@@ -4,6 +4,7 @@ import { CreateProjectDTO } from './dto/create-project.dto';
 import { UpdateProjectDTO } from './dto/update-project.dto';
 import { AddImageProjectDTO } from './dto/add-image-project.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/auth/constants/constants';
 
 @Controller('projects')
 export class ProjectsController {
@@ -22,6 +23,7 @@ export class ProjectsController {
     return this.projectsService.addImageProject(file, +id, userToken.profileId)
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.projectsService.findAll();
