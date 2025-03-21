@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Inject, HttpCode } from '@nestjs/common';
 import { CommentsReactionsService } from './comments-reactions.service';
 import { UpdateCommentsReactionDTO } from './dto/update-comments-reaction.dto';
 import { CreateCommentsReactionDTO } from './dto/create-comments-reaction.dto';
@@ -9,7 +9,8 @@ import { Queue } from 'bullmq';
 export class CommentsReactionsController {
   constructor(
     private readonly commentsReactionsService: CommentsReactionsService,
-    // @InjectQueue('commentsReactionsQueue') private commentReactionQueue: Queue,
+    @InjectQueue('commentsReactionsQueue')
+    private readonly commentsReactionsQueue: Queue,
   ) {}
 
   @Post('/add')
@@ -19,11 +20,10 @@ export class CommentsReactionsController {
   }
 
   @Post('/toggle')
-  toggle(@Body() toggleCommentReaction: CreateCommentsReactionDTO, @Req() request: Request) {
-    const userToken: {profileId: number | null} = request['user'];
-    return this.commentsReactionsService.toggle(toggleCommentReaction, userToken.profileId);
-    // this.commentReactionQueue.add('reaction-job', { toggleCommentReaction, userToken: userToken.profileId });
-    // return {message: 'ok'}
+  @HttpCode(204)
+  async toggle(@Body() toggleCommentReaction: CreateCommentsReactionDTO, @Req() request: Request) {
+     const userToken: {profileId: number | null} = request['user'];
+      await this.commentsReactionsQueue.add('reaction-job', { toggleCommentReaction, userToken: userToken.profileId });
   }
 
   @Get()

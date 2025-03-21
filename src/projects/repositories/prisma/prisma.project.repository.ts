@@ -130,7 +130,8 @@ export class PrismaProjectsRepository implements ProjectsRepository {
               parentId: null // Retorna apenas os comentários principais
             }
           }
-        }
+        },
+        orderBy: {id: 'desc'}
       });
       // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
       //   const imageUrl = await this.findImageByProjectId(p.id)
@@ -193,14 +194,17 @@ export class PrismaProjectsRepository implements ProjectsRepository {
                   // subComments: { // Se precisar de mais níveis de subcomentários, pode repetir
                   //   include: { commentReaction: true, author: true }
                   // }
-                }
-              }
+                },
+                  orderBy: { id: 'asc' }
+              },
             },
+            orderBy: { id: 'asc' },
             where: {
               parentId: null // Retorna apenas os comentários principais
             }
           }
-        }
+        },
+        orderBy: {id: 'asc'}
       });
       // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
       //   const imageUrl = await this.findImageByProjectId(p.id)

@@ -61,11 +61,8 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
       })
 
       if(commentReactionRecord){
-        const updateCommentReactionRecord = await this.prisma.commentReaction.update({
+        const updateCommentReactionRecord = await this.prisma.commentReaction.delete({
           where: { id: commentReactionRecord.id },
-          data: {
-            reactionType: commentReactionRecord.reactionType
-          },
         })
 
       await this.commentsService.removeReaction(create_commentsReaction.commentId, updateCommentReactionRecord.reactionType);
@@ -155,6 +152,7 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
     try {
       const commentsReactionRecord = await this.prisma.commentReaction.findMany({
         where: { authorId: profileId },
+        orderBy: {id: 'desc'}
       })
 
       return commentsReactionRecord || []
@@ -174,7 +172,9 @@ export class PrismaCommentsReactionsRepository implements CommentsReactionsRepos
 
   async findAll(): Promise<CommentsReactionDTO[] | null> {
     try {
-      const commentsReactionRecord = await this.prisma.commentReaction.findMany()
+      const commentsReactionRecord = await this.prisma.commentReaction.findMany({
+        orderBy: {id: 'desc'}
+      })
       return commentsReactionRecord || []
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {

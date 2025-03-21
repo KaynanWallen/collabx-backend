@@ -28,7 +28,19 @@ import { BullModule } from '@nestjs/bull';
     CommentsReactionsModule, 
     ProjectsReactionsModule, 
     R2BucketModule, 
-    MeModule
+    MeModule,
+    BullModule.forRoot({
+      redis: 'redis://localhost:6379',
+      defaultJobOptions: {
+        removeOnComplete: 50,
+        removeOnFail: 200,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
+      }
+    }),
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService,
