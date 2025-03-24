@@ -202,10 +202,16 @@ export class PrismaProjectsRepository implements ProjectsRepository {
             where: {
               parentId: null // Retorna apenas os comentários principais
             }
+          },
+          reactions: {
+            include: {
+              author: true,
+            }
           }
         },
         orderBy: {id: 'asc'}
       });
+      
       // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
       //   const imageUrl = await this.findImageByProjectId(p.id)
       //   return {
@@ -257,32 +263,14 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
   async addReaction(projectId: number, reactionType: string): Promise<any> {
     try {
-      const projectRecord = await this.prisma.project.findUnique({
+      return await this.prisma.comment.update({
         where: { id: projectId },
+        data: {
+          likeCount: {
+            increment: 1,
+          }
+        },
       })
-      
-
-      if(!projectRecord){
-        throw new NotFoundException('O projeto informado não foi encontrado.');
-      }
-
-      if(reactionType == 'like'){
-        return await this.prisma.project.update({
-          where: { id: projectId },
-          data: {
-            likeCount: projectRecord.likeCount + 1,
-          },
-        })
-      }
-
-      if(reactionType == 'deslike'){
-        return await this.prisma.project.update({
-          where: { id: projectId },
-          data: {
-            dislikeCount: projectRecord.likeCount + 1,
-          },
-        })
-      }
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
@@ -299,32 +287,14 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
   async removeReaction(projectId: number, reactionType: string): Promise<any> {
     try {
-      const projectRecord = await this.prisma.project.findUnique({
+      return await this.prisma.comment.update({
         where: { id: projectId },
+        data: {
+          likeCount: {
+            decrement: 1,
+          }
+        },
       })
-      
-
-      if(!projectRecord){
-        throw new NotFoundException('O comentário informado não foi encontrado.');
-      }
-
-      if(reactionType == 'like'){
-        return await this.prisma.project.update({
-          where: { id: projectId },
-          data: {
-            likeCount: projectRecord.likeCount - 1,
-          },
-        })
-      }
-
-      if(reactionType == 'deslike'){
-        return await this.prisma.comment.update({
-          where: { id: projectId },
-          data: {
-            dislikeCount: projectRecord.likeCount - 1,
-          },
-        })
-      }
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;

@@ -25,7 +25,7 @@ export class ProjectsController {
 
   @Public()
   @Get()
-  findAll() {
+  async findAll() {
     return this.projectsService.findAll();
   }
 
@@ -34,6 +34,7 @@ export class ProjectsController {
     return this.projectsService.findImageByProjectId(+id);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectsService.findOne(+id);
