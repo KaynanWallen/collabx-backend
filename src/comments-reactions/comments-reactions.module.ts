@@ -6,11 +6,18 @@ import { CommentsReactionsRepository } from './repositories/comments-reactions.r
 import { PrismaCommentsReactionsRepository } from './repositories/prisma/prisma.comments-reactions.repository';
 import { CommentsService } from 'src/comments/comments.service';
 import { CommentsModule } from 'src/comments/comments.module';
+import { BullModule } from '@nestjs/bull';
+import { QueueConsumers } from './queue';
 
 @Module({
-  imports: [CommentsModule],
+  imports: [
+    CommentsModule,
+    BullModule.registerQueue({
+      name: 'commentsReactionsQueue',
+    })
+  ],
   controllers: [CommentsReactionsController],
-  providers: [CommentsReactionsService, PrismaService, CommentsService,
+  providers: [CommentsReactionsService, PrismaService, CommentsService, ...QueueConsumers,
     {
      provide: CommentsReactionsRepository,
      useClass: PrismaCommentsReactionsRepository,

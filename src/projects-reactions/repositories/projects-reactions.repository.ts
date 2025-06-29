@@ -1,9 +1,10 @@
-import { ProjectsReactionDTO } from "../dto/comments-reaction.dto";
-import { CreateProjectsReactionDTO } from "../dto/create-comments-reaction.dto";
-import { UpdateProjectsReactionDTO } from "../dto/update-comments-reaction.dto";
+import { ProjectsReactionDTO } from "../dto/projects-reaction.dto";
+import { CreateProjectsReactionDTO } from "../dto/create-projects-reaction.dto";
+import { UpdateProjectsReactionDTO } from "../dto/update-projects-reaction.dto";
 
 export abstract class ProjectsReactionsRepository {
   abstract create(create_projectsReaction: CreateProjectsReactionDTO, userTokenId: number | null): Promise<any>;
+  abstract toggle(create_commentsReaction: CreateProjectsReactionDTO, userTokenId: number | null): Promise<any>;
   abstract update(projectsReactionId: number, update_projectsReaction: UpdateProjectsReactionDTO, userTokenId: number | null): Promise<any>;
   abstract findOne(projectsReactionId: number): Promise<ProjectsReactionDTO | null>;
   abstract findAllByProfileId(profileId: number): Promise<ProjectsReactionDTO[] | null>;

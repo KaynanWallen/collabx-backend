@@ -2,9 +2,9 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { PrismaService } from 'src/database/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ProjectsReactionsRepository } from '../projects-reactions.repository';
-import { CreateProjectsReactionDTO } from 'src/projects-reactions/dto/create-comments-reaction.dto';
-import { UpdateProjectsReactionDTO } from 'src/projects-reactions/dto/update-comments-reaction.dto';
-import { ProjectsReactionDTO } from 'src/projects-reactions/dto/comments-reaction.dto';
+import { CreateProjectsReactionDTO } from 'src/projects-reactions/dto/create-projects-reaction.dto';
+import { UpdateProjectsReactionDTO } from 'src/projects-reactions/dto/update-projects-reaction.dto';
+import { ProjectsReactionDTO } from 'src/projects-reactions/dto/projects-reaction.dto';
 import { ProjectsService } from 'src/projects/projects.service';
 
 @Injectable()
@@ -12,7 +12,6 @@ export class PrismaProjectsReactionsRepository implements ProjectsReactionsRepos
   constructor(
     private prisma: PrismaService,
     private projectsService: ProjectsService,
-    // private comment
   ) { }
   
   async create(create_projectsReaction: CreateProjectsReactionDTO, userTokenId: number | null): Promise<any> {
@@ -21,11 +20,11 @@ export class PrismaProjectsReactionsRepository implements ProjectsReactionsRepos
         throw new BadRequestException('Você não tem permissão para criar este projeto.');
       }
       
-      const commentReactionRecord = await this.prisma.projectReaction.findFirst({
+      const projectReactionRecord = await this.prisma.projectReaction.findFirst({
         where: { projectId: create_projectsReaction.projectId, authorId: create_projectsReaction.authorId },
       })
 
-      if(commentReactionRecord){
+      if(projectReactionRecord){
         throw new BadRequestException('Já existe uma reação de comentário para este comentário e autor.');
       }
 
@@ -42,6 +41,48 @@ export class PrismaProjectsReactionsRepository implements ProjectsReactionsRepos
       return createCommentReactionRecord
       
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Erro inesperado ao atualizar o perfil.');
+    }
+  }
+
+  async toggle(create_ProjectsReaction: CreateProjectsReactionDTO, userTokenId: number | null): Promise<any> {
+    try {
+      if(!userTokenId || userTokenId !== create_ProjectsReaction.authorId){
+        throw new BadRequestException('Você não tem permissão para reagir a este comentário.');
+      }
+      
+      const projectReactionRecord = await this.prisma.projectReaction.findFirst({
+        where: { projectId: create_ProjectsReaction.projectId, authorId: create_ProjectsReaction.authorId, reactionType: create_ProjectsReaction.reactionType},
+      })
+
+      if(projectReactionRecord){
+        const updateCommentReactionRecord = await this.prisma.projectReaction.delete({
+          where: { id: projectReactionRecord.id },
+        })
+
+      await this.projectsService.removeReaction(create_ProjectsReaction.projectId, updateCommentReactionRecord.reactionType);
+
+      return updateCommentReactionRecord
+      }
+
+      const createProjectReactionRecord = await this.prisma.projectReaction.create({
+        data: {
+          projectId: create_ProjectsReaction.projectId,
+          authorId: create_ProjectsReaction.authorId,
+          reactionType: create_ProjectsReaction.reactionType,
+        }
+      })
+
+      await this.projectsService.addReaction(create_ProjectsReaction.projectId, createProjectReactionRecord.reactionType);
+      
+      return createProjectReactionRecord
+      
+    } catch (error) {
+      console.log(error)
       if (error instanceof BadRequestException) {
         throw error;
       }
@@ -148,7 +189,7 @@ export class PrismaProjectsReactionsRepository implements ProjectsReactionsRepos
 
   async remove(id: number, userTokenId: number | null): Promise<ProjectsReactionDTO | null> {
     try {
-      const projectsReactionRecord = await this.prisma.commentReaction.findUnique({
+      const projectsReactionRecord = await this.prisma.projectReaction.findUnique({
         where: { id: id },
       })
       

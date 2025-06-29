@@ -110,7 +110,36 @@ export class PrismaProjectsRepository implements ProjectsRepository {
     try {
       const projectRecord = await this.prisma.project.findMany({
         where: { authorId: profileId },
-      })
+        include: {
+          author: true,
+          comments: {
+            include: {
+              commentReaction: true,
+              author: true,
+              subComments: {  // Inclui os comentários filhos
+                include: {
+                  author: true,
+                  commentReaction: true, // Inclui as reações dos subcomentários também
+                  // subComments: { // Se precisar de mais níveis de subcomentários, pode repetir
+                  //   include: { commentReaction: true, author: true }
+                  // }
+                }
+              }
+            },
+            where: {
+              parentId: null // Retorna apenas os comentários principais
+            }
+          }
+        },
+        orderBy: {id: 'desc'}
+      });
+      // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
+      //   const imageUrl = await this.findImageByProjectId(p.id)
+      //   return {
+      //     ...p,
+      //     projectImage: imageUrl?.url
+      //   } as ProjectDTO
+      // }))
 
       return projectRecord || []
     } catch (error) {
@@ -165,15 +194,24 @@ export class PrismaProjectsRepository implements ProjectsRepository {
                   // subComments: { // Se precisar de mais níveis de subcomentários, pode repetir
                   //   include: { commentReaction: true, author: true }
                   // }
-                }
-              }
+                },
+                  orderBy: { id: 'asc' }
+              },
             },
+            orderBy: { id: 'asc' },
             where: {
               parentId: null // Retorna apenas os comentários principais
             }
+          },
+          reactions: {
+            include: {
+              author: true,
+            }
           }
-        }
+        },
+        orderBy: {id: 'asc'}
       });
+      
       // const projectRecordFormattedWithImage = await Promise.all(projectRecord.map(async(p) => {
       //   const imageUrl = await this.findImageByProjectId(p.id)
       //   return {
@@ -225,32 +263,14 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
   async addReaction(projectId: number, reactionType: string): Promise<any> {
     try {
-      const projectRecord = await this.prisma.project.findUnique({
+      return await this.prisma.comment.update({
         where: { id: projectId },
+        data: {
+          likeCount: {
+            increment: 1,
+          }
+        },
       })
-      
-
-      if(!projectRecord){
-        throw new NotFoundException('O projeto informado não foi encontrado.');
-      }
-
-      if(reactionType == 'like'){
-        return await this.prisma.project.update({
-          where: { id: projectId },
-          data: {
-            likeCount: projectRecord.likeCount + 1,
-          },
-        })
-      }
-
-      if(reactionType == 'deslike'){
-        return await this.prisma.project.update({
-          where: { id: projectId },
-          data: {
-            dislikeCount: projectRecord.likeCount + 1,
-          },
-        })
-      }
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
@@ -267,32 +287,14 @@ export class PrismaProjectsRepository implements ProjectsRepository {
 
   async removeReaction(projectId: number, reactionType: string): Promise<any> {
     try {
-      const projectRecord = await this.prisma.project.findUnique({
+      return await this.prisma.comment.update({
         where: { id: projectId },
+        data: {
+          likeCount: {
+            decrement: 1,
+          }
+        },
       })
-      
-
-      if(!projectRecord){
-        throw new NotFoundException('O comentário informado não foi encontrado.');
-      }
-
-      if(reactionType == 'like'){
-        return await this.prisma.project.update({
-          where: { id: projectId },
-          data: {
-            likeCount: projectRecord.likeCount - 1,
-          },
-        })
-      }
-
-      if(reactionType == 'deslike'){
-        return await this.prisma.comment.update({
-          where: { id: projectId },
-          data: {
-            dislikeCount: projectRecord.likeCount - 1,
-          },
-        })
-      }
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;

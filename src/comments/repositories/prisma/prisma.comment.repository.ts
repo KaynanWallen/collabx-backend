@@ -40,8 +40,16 @@ export class PrismaCommentsRepository implements CommentsRepository {
         })
       }
 
+      await this.prisma.project.update({
+        where: { id: createCommentRecord.projectId },
+        data: {
+          commentCount: {
+            increment: 1,
+          }
+        }
+      })
+
       return createCommentRecord
-      
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -303,6 +311,15 @@ export class PrismaCommentsRepository implements CommentsRepository {
           }
         })
       }
+
+      await this.prisma.project.update({
+        where: { id: removeCommentRecord.projectId },
+        data: {
+          commentCount: {
+            decrement: 1,
+          }
+        }
+      })
 
       return removeCommentRecord
     } catch (error) {

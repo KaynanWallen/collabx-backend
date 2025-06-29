@@ -15,9 +15,33 @@ import { ProjectsReactionsModule } from './projects-reactions/projects-reactions
 import { R2BucketModule } from './r2-bucket/r2-bucket.module';
 import { ConfigModule } from '@nestjs/config';
 import { MeModule } from './me/me.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
-  imports: [AuthModule, AccountsModule, ProfilesModule, ProjectsModule, CommentsModule, ImagesModule, CommentsReactionsModule, ProjectsReactionsModule, R2BucketModule, MeModule],
+  imports: [
+    AuthModule, 
+    AccountsModule, 
+    ProfilesModule, 
+    ProjectsModule, 
+    CommentsModule, 
+    ImagesModule, 
+    CommentsReactionsModule, 
+    ProjectsReactionsModule, 
+    R2BucketModule, 
+    MeModule,
+    BullModule.forRoot({
+      redis: 'redis://localhost:6379',
+      defaultJobOptions: {
+        removeOnComplete: 50,
+        removeOnFail: 200,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
+      }
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService,
      {

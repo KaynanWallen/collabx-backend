@@ -7,15 +7,19 @@ import { PrismaProjectsReactionsRepository } from './repositories/prisma/prisma.
 import { ProjectsService } from 'src/projects/projects.service';
 import { ProjectsModule } from 'src/projects/projects.module';
 import { CommentsModule } from 'src/comments/comments.module';
+import { BullModule } from '@nestjs/bull';
+import { QueueConsumers } from './queue';
 
 @Module({
-  imports: [ProjectsModule, CommentsModule],
+  imports: [ProjectsModule, CommentsModule, BullModule.registerQueue({
+    name: 'projectsReactionsQueue',
+  })],
   controllers: [ProjectsReactionsController],
-  providers: [ProjectsReactionsService, PrismaService, ProjectsService,
+  providers: [ProjectsReactionsService, PrismaService, ProjectsService, ...QueueConsumers,
     {
-     provide: ProjectsReactionsRepository,
-     useClass: PrismaProjectsReactionsRepository,
-   },
- ],
+      provide: ProjectsReactionsRepository,
+      useClass: PrismaProjectsReactionsRepository,
+    },
+  ],
 })
-export class ProjectsReactionsModule {}
+export class ProjectsReactionsModule { }

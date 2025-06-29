@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDTO } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { Public } from 'src/auth/constants/constants';
 
 @Controller('profiles')
 export class ProfilesController {
@@ -13,14 +14,24 @@ export class ProfilesController {
     return this.profilesService.create(createProfileDto, userToken.id);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.profilesService.findAll();
   }
 
+  @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Query('q') q: string) {
+    if(q == 'id') return this.profilesService.findOne(+id);
+    if(q == 'username') return this.profilesService.findOneByUsername(id);
     return this.profilesService.findOne(+id);
+  }
+
+  @Public()
+  @Get(':id/projects')
+  findProfileProjects(@Param('id') id: string){
+    return this.profilesService.findAllProjectsByProfileId(+id)
   }
 
   @Patch(':id')

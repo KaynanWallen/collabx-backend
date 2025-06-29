@@ -13,7 +13,7 @@ import { R2BucketModule } from 'src/r2-bucket/r2-bucket.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ProjectsModule, CommentsModule, ImagesModule, R2BucketModule, ConfigModule],
+  imports: [CommentsModule, ImagesModule, R2BucketModule, ConfigModule],
   controllers: [ProjectsController],
   providers: [ProjectsService, PrismaService,CommentsService,ImagesService, R2BucketService,
     {

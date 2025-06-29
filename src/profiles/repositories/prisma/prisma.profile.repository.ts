@@ -124,6 +124,34 @@ export class PrismaProfilesRepository implements ProfilesRepository {
     }
   }
 
+  async findOneByUsername(username: string): Promise<ProfileDTO | null> {
+    const formattedUsername = username.replace(/-/g, " ");
+    try {
+      const profileRecord = await this.prisma.profile.findUnique({
+        where: { username: formattedUsername },
+      })
+      
+
+      if(!profileRecord){
+        throw new NotFoundException('O perfil informado não foi encontrado.');
+      }
+
+      return profileRecord
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException('O accountId informado não existe.');
+        }
+      }
+      console.log(error)
+      throw new InternalServerErrorException('Erro inesperado ao buscar o perfil.');
+    }
+  }
+
   async findAll(): Promise<ProfileDTO[] | null> {
     try {
       const profileRecord = await this.prisma.profile.findMany()

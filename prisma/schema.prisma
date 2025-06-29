@@ -19,9 +19,9 @@ model Account {
 
 model Profile {
   id              Int               @id @default(autoincrement())
-  accountId       Int
-  name            String
-  username        String
+  accountId       Int 
+  name            String 
+  username        String            @unique
   title           String
   githubLink      String?
   linkedinLink    String?
@@ -47,7 +47,7 @@ model Project {
   id             Int               @id @default(autoincrement())
   authorId       Int
   title          String
-  content        String
+  content        String   @db.Text
   techs          String?
   figmaLink      String?
   githubLink     String?
