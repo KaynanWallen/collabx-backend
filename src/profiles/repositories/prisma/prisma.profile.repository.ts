@@ -14,7 +14,7 @@ export class PrismaProfilesRepository implements ProfilesRepository {
 
   async create(create_profile: CreateProfileDTO, userTokenId: number | null): Promise<any> {
     try {
-      if(!userTokenId || userTokenId !== create_profile.accountId){
+      if(!userTokenId || userTokenId != create_profile.accountId){
         throw new BadRequestException('Você não tem permissão para criar este perfil.');
       }
 

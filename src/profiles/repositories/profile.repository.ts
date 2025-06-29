@@ -8,5 +8,4 @@ export abstract class ProfilesRepository {
   abstract findOne(profileId: number): Promise<ProfileDTO | null>;
   abstract findAll(): Promise<ProfileDTO[] | null>;
   abstract remove(id: number, userTokenId: number | null): Promise<ProfileDTO | null>;
-  
 }
